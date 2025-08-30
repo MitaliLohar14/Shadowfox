@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RCB Fan Hub • Ee Sala Cup Namde!</title>
+  <meta name="description" content="Unofficial Royal Challengers Bengaluru fan hub with schedule, players, stats, news, and fan zone." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23DA1212'/%3E%3Ctext x='50' y='60' font-size='48' text-anchor='middle' fill='white' font-family='Arial'%3ERCB%3C/text%3E%3C/svg%3E" />
+  <style>
+    :root{
+      --rcb-red:#DA1212; --rcb-dark:#0b0f19; --rcb-gold:#c4a356; --ink:#111827; --paper:#ffffff;
+      --muted:#6b7280; --card:#f8fafc; --ring:rgba(0,0,0,.08);
+    }
+    @media (prefers-color-scheme: dark){
+      :root{ --paper:#0b0f19; --ink:#e5e7eb; --card:#0f1626; --ring:rgba(255,255,255,.08); }
+      body{ background:linear-gradient(180deg, #0b0f19, #0b0f19 60%, #111827); }
+    }
+    *{ box-sizing:border-box }
+    html,body{ margin:0; padding:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color:var(--ink); background:#fff; }
+    a{ color:var(--rcb-gold); text-decoration:none }
+    a:hover{ text-decoration:underline }
+
+    .container{ max-width:1100px; margin:0 auto; padding:24px; }
+    header.hero{ position:relative; border-radius:20px; overflow:hidden; background:radial-gradient(1200px 400px at 10% -10%, #ff624a, transparent), linear-gradient(135deg, var(--rcb-dark), #1f2937); color:#fff; padding:32px 24px; box-shadow:0 20px 40px rgba(0,0,0,.25); }
+    .brand{ display:flex; align-items:center; gap:16px }
+    .crest{ width:64px; height:64px; background:conic-gradient(from 0deg, var(--rcb-gold), #f5d79b, var(--rcb-gold)); border-radius:50%; display:grid; place-items:center; box-shadow: inset 0 2px 6px rgba(0,0,0,.25); color:#000; font-weight:800 }
+    .title{ font-size:clamp(22px, 5vw, 36px); margin:0 }
+    .motto{ margin:4px 0 0; color:#ffe6b3 }
+    .hero-grid{ display:grid; grid-template-columns: 1.2fr .8fr; gap:18px; margin-top:16px }
+    @media (max-width:900px){ .hero-grid{ grid-template-columns:1fr } }
+
+    .tile{ background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.15); border-radius:16px; padding:16px; backdrop-filter: blur(8px); }
+    .kpis{ display:grid; grid-template-columns: repeat(4, 1fr); gap:12px }
+    @media (max-width:700px){ .kpis{ grid-template-columns: repeat(2, 1fr) } }
+    .kpi{ background:var(--paper); border:1px solid var(--ring); border-radius:16px; padding:14px; text-align:center; }
+    .kpi h3{ margin:0; font-size:13px; color:var(--muted) }
+    .kpi p{ margin:6px 0 0; font-weight:700; font-size:20px }
+
+    .section{ margin:28px 0 }
+    .section h2{ display:flex; align-items:center; gap:10px; font-size:22px; margin:0 0 12px }
+    .section small{ color:var(--muted) }
+
+    .card{ background:var(--card); border:1px solid var(--ring); border-radius:18px; padding:16px; box-shadow: 0 1px 0 var(--ring) }
+    .grid{ display:grid; gap:16px }
+
+    /* Layout grids */
+    .grid-2{ grid-template-columns: 1.1fr .9fr }
+    .grid-3{ grid-template-columns: repeat(3, 1fr) }
+    .grid-4{ grid-template-columns: repeat(4, 1fr) }
+    @media (max-width:1000px){ .grid-4{ grid-template-columns: repeat(2, 1fr) } }
+    @media (max-width:640px){ .grid-3{ grid-template-columns: 1fr } .grid-4{ grid-template-columns: 1fr } .grid-2{ grid-template-columns:1fr } }
+
+    /* Buttons & inputs */
+    .btn{ display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border-radius:12px; border:1px solid var(--ring); background:var(--paper); cursor:pointer; font-weight:600 }
+    .btn.primary{ background:var(--rcb-red); color:#fff; border-color:#b40f0f }
+    .btn.ghost{ background:transparent; color:#fff; border-color:rgba(255,255,255,.2) }
+    .btn:disabled{ opacity:.6; cursor:not-allowed }
+    .input, .select, textarea{ width:100%; padding:10px 12px; border-radius:12px; border:1px solid var(--ring); background:var(--paper); color:inherit }
+
+    /* Schedule */
+    table{ width:100%; border-collapse:collapse }
+    th, td{ padding:12px; border-bottom:1px dashed var(--ring); text-align:left }
+    th{ font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted) }
+    .tag{ display:inline-block; font-size:12px; padding:2px 8px; border-radius:999px; border:1px solid var(--ring); background:var(--paper) }
+
+    /* Players */
+    .player{ display:flex; gap:12px; align-items:center }
+    .player img{ width:64px; height:64px; border-radius:14px; object-fit:cover; border:1px solid var(--ring) }
+    .player .meta{ line-height:1.25 }
+    .modal{ position:fixed; inset:0; display:none; place-items:center; background:rgba(0,0,0,.55); padding:16px }
+    .modal.open{ display:grid }
+    .modal-card{ background:var(--paper); color:var(--ink); border:1px solid var(--ring); border-radius:18px; max-width:600px; width:100%; padding:18px; }
+
+    /* News */
+    .news-card{ display:grid; grid-template-columns: 120px 1fr; gap:12px; border:1px solid var(--ring); border-radius:14px; overflow:hidden; background:var(--paper) }
+    .news-card img{ width:100%; height:100%; object-fit:cover }
+    .news-card h4{ margin:0 0 6px }
+
+    /* Fan zone */
+    .post{ padding:10px 12px; border:1px dashed var(--ring); border-radius:12px; background:var(--paper); margin-top:10px }
+
+    /* Footer */
+    footer{ margin:40px 0 20px; color:var(--muted); text-align:center }
+    .heart{ color:var(--rcb-red); font-weight:900 }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="hero">
+      <div class="brand">
+        <div class="crest">RCB</div>
+        <div>
+          <h1 class="title">Royal Challengers Bengaluru — Fan Hub</h1>
+          <p class="motto">Ee Sala Cup Namde! • Unofficial community site</p>
+        </div>
+        <div style="margin-left:auto; display:flex; gap:8px">
+          <button class="btn ghost" id="toggleTheme" title="Toggle theme">🌓 Theme</button>
+          <button class="btn ghost" id="notifyBtn" title="Enable match alerts">🔔 Alerts</button>
+        </div>
+      </div>
+
+      <div class="hero-grid">
+        <div class="tile">
+          <h3 style="margin:0 0 10px">Next Match</h3>
+          <div id="nextMatch" style="font-size:18px"></div>
+          <p style="margin:6px 0 0; color:#ffdcb3"><span id="countdown">—</span></p>
+          <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap">
+            <button class="btn primary" id="addToCal">➕ Add to Calendar</button>
+            <button class="btn" id="shareBtn">📤 Share</button>
+          </div>
+        </div>
+        <div class="kpis">
+          <div class="kpi"><h3>Season</h3><p id="seasonYear">2025</p></div>
+          <div class="kpi"><h3>Wins</h3><p id="wins">0</p></div>
+          <div class="kpi"><h3>Net RR</h3><p id="netrr">—</p></div>
+          <div class="kpi"><h3>Table</h3><p id="tablePos">—</p></div>
+        </div>
+      </div>
+    </header>
+
+    <section class="section">
+      <h2>📅 Schedule <small>(filter by venue)</small></h2>
+      <div class="card">
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px">
+          <select id="venueFilter" class="select" style="max-width:220px">
+            <option value="all">All Venues</option>
+          </select>
+          <button class="btn" id="resetSchedule">Reset</button>
+        </div>
+        <div style="overflow:auto">
+          <table id="scheduleTable" aria-label="RCB schedule">
+            <thead>
+              <tr><th>Date</th><th>Opponent</th><th>Venue</th><th>Home/Away</th><th>Action</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>👥 Players <small>(search & quick profiles)</small></h2>
+      <div class="card">
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px">
+          <input id="playerSearch" class="input" placeholder="Search players by name or role…" />
+          <button id="clearPlayerSearch" class="btn">Clear</button>
+        </div>
+        <div id="playersGrid" class="grid grid-3"></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>📈 Team Stats</h2>
+      <div class="grid grid-2">
+        <div class="card"><h3 style="margin-top:0">Run Rate by Match</h3><canvas id="chartRunRate" height="180"></canvas></div>
+        <div class="card"><h3 style="margin-top:0">Win % by Venue</h3><canvas id="chartVenues" height="180"></canvas></div>
+        <div class="card"><h3 style="margin-top:0">Top Batters</h3><canvas id="chartBatters" height="180"></canvas></div>
+        <div class="card"><h3 style="margin-top:0">Top Bowlers</h3><canvas id="chartBowlers" height="180"></canvas></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>📰 News</h2>
+      <div id="newsWrap" class="grid grid-3"></div>
+    </section>
+
+    <section class="section">
+      <h2>🎉 Fan Zone</h2>
+      <div class="grid grid-2">
+        <div class="card">
+          <h3 style="margin-top:0">Matchday Poll</h3>
+          <p>Who will be RCB's <strong>POTM</strong> in the next game?</p>
+          <form id="pollForm">
+            <label><input type="radio" name="potm" value="Kohli"> Virat Kohli</label><br>
+            <label><input type="radio" name="potm" value="Faf"> Faf du Plessis</label><br>
+            <label><input type="radio" name="potm" value="Siraj"> Mohammed Siraj</label><br>
+            <button class="btn primary" type="submit">Vote</button>
+            <small style="margin-left:8px; color:var(--muted)">(one vote per browser)</small>
+          </form>
+          <div id="pollResults" style="margin-top:10px"></div>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0">Mini Forum</h3>
+          <form id="postForm" style="display:grid; gap:8px">
+            <input class="input" id="nickname" placeholder="Nickname" />
+            <textarea id="message" rows="3" placeholder="Share your RCB thoughts…"></textarea>
+            <button class="btn" type="submit">Post</button>
+          </form>
+          <div id="posts"></div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      Built with ❤️ by fans of RCB. Not affiliated with IPL/BCCI/RCB. Data is demo-only; plug your APIs to go live.
+    </footer>
+  </div>
+
+  <!-- Dependencies: Chart.js for charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" integrity="sha384-2dQb7Vyi9+o9HbzB2e8RXKQvB9M3ic6l2S2y4qfJ2dJISbX4kEou2v0SgI0gKQk4" crossorigin="anonymous"></script>
+
+  <script>
+  // ===== Demo Data (replace with live APIs later) =====
+  const TEAM = { name: 'Royal Challengers Bengaluru', short: 'RCB', motto: 'Ee Sala Cup Namde!' };
+  const DATA = {
+    schedule: [
+      { id: 1, opponent: 'CSK', venue: 'Bengaluru', date: '2025-04-02T19:30:00+05:30', home: true },
+      { id: 2, opponent: 'MI', venue: 'Mumbai', date: '2025-04-06T19:30:00+05:30', home: false },
+      { id: 3, opponent: 'KKR', venue: 'Kolkata', date: '2025-04-10T19:30:00+05:30', home: false },
+    ],
+    players: [
+      { id: 18, name: 'Virat Kohli', role: 'Batsman', img: 'https://images.unsplash.com/photo-1541877944-ac82a091518a?q=80&w=600&auto=format&fit=crop', bio: 'RCB icon, chasing maestro, elite fielder.', stats: { matches: 252, runs: 8000, sr: 133.5, avg: 38.2 } },
+      { id: 17, name: 'Faf du Plessis (C)', role: 'Batsman', img: 'https://images.unsplash.com/photo-1521417531039-975dbd376aad?q=80&w=600&auto=format&fit=crop', bio: 'Classy opener and captain.', stats: { matches: 150, runs: 4200, sr: 138.3, avg: 35.4 } },
+      { id: 63, name: 'Mohammed Siraj', role: 'Bowler', img: 'https://images.unsplash.com/photo-1521417531039-3c1e3f9fb1b6?q=80&w=600&auto=format&fit=crop', bio: 'New-ball swing & death skills.', stats: { matches: 120, wkts: 145, econ: 7.8, avg: 22.5 } },
+    ],
+    charts: {
+      runRateSeries: [ { match: 'M1', rpo: 8.1 }, { match: 'M2', rpo: 9.4 }, { match: 'M3', rpo: 7.8 }, { match: 'M4', rpo: 9.9 }, { match: 'M5', rpo: 8.7 } ],
+      winByVenue: [ { venue: 'Bengaluru', winPct: 61 }, { venue: 'Mumbai', winPct: 47 }, { venue: 'Kolkata', winPct: 52 }, { venue: 'Chennai', winPct: 39 } ],
+      topBatters: [ { name: 'Kohli', runs: 730 }, { name: 'Faf', runs: 620 }, { name: 'Patidar', runs: 410 } ],
+      topBowlers: [ { name: 'Siraj', wkts: 21 }, { name: 'Karn', wkts: 17 }, { name: 'Topley', wkts: 14 } ],
+    },
+    news: [
+      { id: 'n1', title: 'RCB unveil bold 2025 kit with retro gold trim', img: 'https://images.unsplash.com/photo-1508087622266-8f99f1a83c0f?q=80&w=600&auto=format&fit=crop', excerpt: 'New strip nods to the early years with modern tech.', date: '2025-02-14' },
+      { id: 'n2', title: 'Academy prospects shine in pre-season warm-ups', img: 'https://images.unsplash.com/photo-1521417531039-1a8b4e77b9a3?q=80&w=600&auto=format&fit=crop', excerpt: 'U23 quicks clock impressive speeds at Alur.', date: '2025-03-05' },
+      { id: 'n3', title: 'Fan meetup planned at Chinnaswamy', img: 'https://images.unsplash.com/photo-1551958219-acbc608c6377?q=80&w=600&auto=format&fit=crop', excerpt: 'Community tifo and chants practice before opener.', date: '2025-03-20' },
+    ]
+  };
+
+  // ===== Utilities =====
+  const $ = (q, el=document) => el.querySelector(q);
+  const $$ = (q, el=document) => Array.from(el.querySelectorAll(q));
+  const fmtDate = iso => new Date(iso).toLocaleString([], { dateStyle:'medium', timeStyle:'short' });
+
+  // ===== Theme toggle =====
+  const themeKey = 'rcb.theme.dark';
+  const setTheme = (dark) => {
+    if(dark){ document.documentElement.style.colorScheme='dark'; document.body.classList.add('dark'); }
+    else { document.documentElement.style.colorScheme='light'; document.body.classList.remove('dark'); }
+    localStorage.setItem(themeKey, JSON.stringify(dark));
+  };
+  const savedTheme = JSON.parse(localStorage.getItem(themeKey) || 'true');
+  setTheme(savedTheme);
+  $('#toggleTheme').addEventListener('click', ()=> setTheme(!JSON.parse(localStorage.getItem(themeKey)||'true')));
+
+  // ===== Schedule =====
+  const scheduleBody = $('#scheduleTable tbody');
+  const venueFilter = $('#venueFilter');
+  const resetScheduleBtn = $('#resetSchedule');
+  function buildSchedule(){
+    const venues = Array.from(new Set(DATA.schedule.map(s=>s.venue)));
+    venues.forEach(v=>{ const o=document.createElement('option'); o.value=v; o.textContent=v; venueFilter.appendChild(o); });
+    renderSchedule();
+  }
+  function renderSchedule(){
+    const venue = venueFilter.value;
+    scheduleBody.innerHTML = '';
+    DATA.schedule
+      .filter(s=> venue==='all' || s.venue===venue)
+      .sort((a,b)=> new Date(a.date)-new Date(b.date))
+      .forEach(s=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${fmtDate(s.date)}</td>
+          <td>vs <strong>${s.opponent}</strong></td>
+          <td>${s.venue}</td>
+          <td><span class="tag">${s.home? 'Home' : 'Away'}</span></td>
+          <td><button class="btn" data-addcal="${s.id}">Add to iCal</button></td>
+        `;
+        scheduleBody.appendChild(tr);
+      });
+  }
+  venueFilter.addEventListener('change', renderSchedule);
+  resetScheduleBtn.addEventListener('click', ()=>{ venueFilter.value='all'; renderSchedule(); });
+
+  // ===== Next match + countdown =====
+  function nextMatch(){
+    const now = new Date();
+    const upcoming = DATA.schedule.filter(s=> new Date(s.date)>now).sort((a,b)=> new Date(a.date)-new Date(b.date))[0] || DATA.schedule[0];
+    return upcoming;
+  }
+  function startCountdown(){
+    const n = nextMatch();
+    $('#nextMatch').textContent = `RCB vs ${n.opponent} • ${n.venue} • ${fmtDate(n.date)}`;
+    const target = new Date(n.date).getTime();
+    function tick(){
+      const d = target - Date.now();
+      if(d<=0){ $('#countdown').textContent = 'Live now!'; return; }
+      const days = Math.floor(d/86400000);
+      const hours = Math.floor((d%86400000)/3600000);
+      const mins = Math.floor((d%3600000)/60000);
+      const secs = Math.floor((d%60000)/1000);
+      $('#countdown').textContent = `${days}d ${hours}h ${mins}m ${secs}s`;
+      requestAnimationFrame(()=> setTimeout(tick, 1000));
+    }
+    tick();
+  }
+
+  // ===== iCal export & share =====
+  function toICS(evtMatch){
+    const dt = new Date(evtMatch.date);
+    const pad = n=> String(n).padStart(2,'0');
+    const toICSDate = d=> `${d.getUTCFullYear()}${pad(d.getUTCMonth()+1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}00Z`;
+    const uid = `rcb-${evtMatch.id}@fan-hub`;
+    return `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//RCB Fan Hub//EN\nBEGIN:VEVENT\nUID:${uid}\nDTSTAMP:${toICSDate(new Date())}\nDTSTART:${toICSDate(dt)}\nDTEND:${toICSDate(new Date(dt.getTime()+3*3600000))}\nSUMMARY:RCB vs ${evtMatch.opponent}\nLOCATION:${evtMatch.venue}\nDESCRIPTION:RCB match reminder\nEND:VEVENT\nEND:VCALENDAR`;
+  }
+  function downloadICS(match){
+    const ics = toICS(match);
+    const blob = new Blob([ics], { type: 'text/calendar' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href=url; a.download=`RCB-vs-${match.opponent}.ics`; a.click();
+    URL.revokeObjectURL(url);
+  }
+  $('#addToCal').addEventListener('click', ()=> downloadICS(nextMatch()));
+  document.addEventListener('click', (e)=>{
+    const id = e.target?.dataset?.addcal; if(!id) return;
+    const m = DATA.schedule.find(s=> String(s.id)===String(id));
+    if(m) downloadICS(m);
+  });
+
+  // Native share
+  $('#shareBtn').addEventListener('click', async ()=>{
+    const n = nextMatch();
+    const text = `RCB vs ${n.opponent} at ${n.venue} on ${fmtDate(n.date)} — Ee Sala Cup Namde!`;
+    if(navigator.share){ try{ await navigator.share({ title:'RCB Match', text, url: location.href }); } catch{} }
+    else { navigator.clipboard.writeText(text); alert('Copied details to clipboard!'); }
+  });
+
+  // Notifications
+  $('#notifyBtn').addEventListener('click', async ()=>{
+    if(!('Notification'in window)) return alert('Notifications not supported');
+    let perm = Notification.permission;
+    if(perm!=='granted') perm = await Notification.requestPermission();
+    if(perm==='granted') new Notification('RCB Fan Hub', { body: 'You will get a reminder 30 mins before kickoff.' });
+    localStorage.setItem('rcb.notify', perm);
+  });
+
+  // ===== Players =====
+  function renderPlayers(list){
+    const grid = $('#playersGrid'); grid.innerHTML='';
+    list.forEach(p=>{
+      const card = document.createElement('div'); card.className='card player';
+      card.innerHTML = `
+        <img src="${p.img}" alt="${p.name}">
+        <div class="meta">
+          <div style="font-weight:700">${p.name}</div>
+          <div style="color:var(--muted)">${p.role}</div>
+          <div><button class="btn" data-profile="${p.id}">Profile</button></div>
+        </div>`;
+      grid.appendChild(card);
+    });
+  }
+  const playerSearch = $('#playerSearch');
+  playerSearch.addEventListener('input', ()=>{
+    const q = playerSearch.value.toLowerCase().trim();
+    const filtered = DATA.players.filter(p => [p.name, p.role].join(' ').toLowerCase().includes(q));
+    renderPlayers(filtered);
+  });
+  $('#clearPlayerSearch').addEventListener('click', ()=>{ playerSearch.value=''; renderPlayers(DATA.players); });
+
+  // Modal for profiles
+  const modal = document.createElement('div'); modal.className='modal'; modal.innerHTML = `<div class="modal-card" role="dialog" aria-modal="true"><div id="modalBody"></div><div style="display:flex; justify-content:flex-end; margin-top:12px"><button class="btn" id="closeModal">Close</button></div></div>`; document.body.appendChild(modal);
+  document.addEventListener('click', (e)=>{
+    const id = e.target?.dataset?.profile; if(!id) return;
+    const p = DATA.players.find(x=> String(x.id)===String(id));
+    if(p){
+      $('#modalBody').innerHTML = `
+        <div style="display:flex; gap:14px; align-items:flex-start">
+          <img src="${p.img}" alt="${p.name}" style="width:96px;height:96px;border-radius:16px;object-fit:cover;border:1px solid var(--ring)">
+          <div>
+            <h3 style="margin:0">${p.name}</h3>
+            <p style="margin:.25rem 0 .5rem; color:var(--muted)">${p.role}</p>
+            <div class="grid" style="grid-template-columns: repeat(3, minmax(0, 1fr)); gap:8px">
+              ${p.stats.runs? `<div class='kpi'><h3>Runs</h3><p>${p.stats.runs}</p></div>`:''}
+              ${p.stats.sr? `<div class='kpi'><h3>SR</h3><p>${p.stats.sr}</p></div>`:''}
+              ${p.stats.avg? `<div class='kpi'><h3>Avg</h3><p>${p.stats.avg}</p></div>`:''}
+              ${p.stats.wkts? `<div class='kpi'><h3>Wkts</h3><p>${p.stats.wkts}</p></div>`:''}
+              ${p.stats.econ? `<div class='kpi'><h3>Economy</h3><p>${p.stats.econ}</p></div>`:''}
+            </div>
+            <p style="margin-top:10px">${p.bio}</p>
+          </div>
+        </div>`;
+      modal.classList.add('open');
+    }
+  });
+  modal.addEventListener('click', (e)=>{ if(e.target.id==='closeModal' || e.target===modal) modal.classList.remove('open'); });
+
+  // ===== Charts =====
+  function makeChart(ctx, type, data, options){ return new Chart(ctx, { type, data, options }); }
+  function initCharts(){
+    makeChart($('#chartRunRate'), 'line', {
+      labels: DATA.charts.runRateSeries.map(x=>x.match),
+      datasets: [{ label: 'RPO', data: DATA.charts.runRateSeries.map(x=>x.rpo), tension:.35, fill:false }]
+    }, { responsive:true, plugins:{ legend:{ display:true } } });
+    makeChart($('#chartVenues'), 'bar', {
+      labels: DATA.charts.winByVenue.map(x=>x.venue),
+      datasets: [{ label: 'Win %', data: DATA.charts.winByVenue.map(x=>x.winPct) }]
+    }, { responsive:true });
+    makeChart($('#chartBatters'), 'bar', {
+      labels: DATA.charts.topBatters.map(x=>x.name),
+      datasets: [{ label: 'Runs', data: DATA.charts.topBatters.map(x=>x.runs) }]
+    }, { responsive:true });
+    makeChart($('#chartBowlers'), 'bar', {
+      labels: DATA.charts.topBowlers.map(x=>x.name),
+      datasets: [{ label: 'Wickets', data: DATA.charts.topBowlers.map(x=>x.wkts) }]
+    }, { responsive:true });
+  }
+
+  // ===== News =====
+  function renderNews(){
+    const wrap = $('#newsWrap'); wrap.innerHTML='';
+    DATA.news.forEach(n=>{
+      const card = document.createElement('article'); card.className='news-card';
+      card.innerHTML = `
+        <img src="${n.img}" alt="news" loading="lazy">
+        <div style="padding:10px 12px">
+          <h4>${n.title}</h4>
+          <small style="color:var(--muted)">${new Date(n.date).toLocaleDateString()}</small>
+          <p style="margin:6px 0 0">${n.excerpt}</p>
+        </div>`;
+      wrap.appendChild(card);
+    });
+  }
+
+  // ===== Poll =====
+  const pollKey = 'rcb.poll.potm';
+  function loadPoll(){
+    const results = JSON.parse(localStorage.getItem(pollKey) || '{}');
+    $('#pollResults').innerHTML = Object.keys(results).length ?
+      Object.entries(results).map(([k,v])=>`<div>${k}: <strong>${v}</strong></div>`).join('') : '<em>No votes yet</em>';
+    if(localStorage.getItem(pollKey+':voted')) $('#pollForm').querySelectorAll('input,button').forEach(el=>el.disabled=true);
+  }
+  $('#pollForm').addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const choice = new FormData(e.target).get('potm');
+    if(!choice) return alert('Pick a player');
+    const results = JSON.parse(localStorage.getItem(pollKey) || '{}');
+    results[choice] = (results[choice]||0)+1;
+    localStorage.setItem(pollKey, JSON.stringify(results));
+    localStorage.setItem(pollKey+':voted', '1');
+    loadPoll();
+  });
+
+  // ===== Mini Forum =====
+  const postsKey = 'rcb.forum.posts';
+  function renderPosts(){
+    const posts = JSON.parse(localStorage.getItem(postsKey) || '[]');
+    const wrap = $('#posts'); wrap.innerHTML = posts.length? '' : '<em>No posts yet. Be the first!</em>';
+    posts.slice().reverse().forEach(p=>{
+      const el = document.createElement('div'); el.className='post';
+      el.innerHTML = `<strong>${p.nick||'Fan'}</strong> <small style="color:var(--muted)">• ${new Date(p.ts).toLocaleString()}</small><p style="margin:6px 0 0">${p.msg}</p>`;
+      wrap.appendChild(el);
+    })
+  }
+  $('#postForm').addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const nick = $('#nickname').value.trim();
+    const msg = $('#message').value.trim();
+    if(!msg) return;
+    const posts = JSON.parse(localStorage.getItem(postsKey) || '[]');
+    posts.push({ nick, msg, ts: Date.now() });
+    localStorage.setItem(postsKey, JSON.stringify(posts));
+    $('#message').value=''; renderPosts();
+  });
+
+  // ===== Init =====
+  function init(){
+    buildSchedule();
+    renderPlayers(DATA.players);
+    initCharts();
+    renderNews();
+    loadPoll();
+    renderPosts();
+    startCountdown();
+  }
+  document.addEventListener('DOMContentLoaded', init);
+
+  // ===== OPTIONAL: Flask API endpoints sketch (server-side) =====
+  /*
+  # Save as app.py (optional). Run:  pip install flask && flask --app app run -p 5000 --debug
+  from flask import Flask, jsonify, request
+  app = Flask(__name__)
+
+  SCHEDULE = [
+    { 'id': 1, 'opponent':'CSK','venue':'Bengaluru','date':'2025-04-02T19:30:00+05:30','home': True },
+  ]
+
+  @app.get('/api/schedule')
+  def schedule():
+      return jsonify(SCHEDULE)
+
+  @app.post('/api/posts')
+  def posts_create():
+      data = request.json; # {nick, msg}
+      # TODO: persist to a DB (e.g., SQLite)
+      return jsonify({ 'ok': True })
+
+  if __name__ == '__main__':
+      app.run()
+  */
+  </script>
+</body>
+</html>
